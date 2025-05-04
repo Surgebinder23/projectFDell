@@ -1,0 +1,324 @@
+# Follow simple AlphaVantage API instructions
+# Using API I got access to balance sheet, income statement and cash flow statement.
+# Next steps is probably to make a class
+
+from datetime import datetime
+
+def get_previous_five_years_operating_cashflow(stock_data):
+    """
+    Extracts the 'operatingCashflow' for the five previous fiscal years.
+
+    Args:
+        stock_data (dict): A dictionary containing stock data, with 'annualReports'
+                           being a list of dictionaries with fiscal information.
+
+    Returns:
+        dict: A dictionary where keys are fiscal ending dates and values are
+              the corresponding 'operatingCashflow' for the five previous years.
+    """
+    if not stock_data or 'annualReports' not in stock_data or not stock_data['annualReports']:
+        return {}
+
+    reports = stock_data['annualReports']
+    # Sort reports by fiscalDateEnding in descending order (most recent first)
+    reports.sort(key=lambda x: x['fiscalDateEnding'], reverse=True)
+
+    if not reports:
+        return {}
+
+    latest_date_str = reports[0]['fiscalDateEnding']
+    latest_year = datetime.strptime(latest_date_str, "%Y-%m-%d").year
+
+    previous_cashflows = {}
+    for report in reports:
+        date_str = report['fiscalDateEnding']
+        year = datetime.strptime(date_str, "%Y-%m-%d").year
+        if latest_year - 10 <= year < latest_year and 'netIncome' in report:
+            previous_cashflows[date_str] = report['netIncome']
+
+    return previous_cashflows
+
+# stock_data = {'symbol': 'IBM', 'annualReports': [{'fiscalDateEnding': '2024-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13445000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4667000000', 'capitalExpenditures': '1685000000', 'changeInReceivables': 'None', 'changeInInventory': '-166000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-7079000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6147000000', 'dividendPayoutCommonStock': '6147000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-651000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6023000000'}, {'fiscalDateEnding': '2023-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13432000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4381000000', 'capitalExpenditures': '1918000000', 'changeInReceivables': 'None', 'changeInInventory': '390000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-6016000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6016000000', 'dividendPayoutCommonStock': '6016000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-416000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6925000000'}, {'fiscalDateEnding': '2022-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12820000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4284000000', 'capitalExpenditures': '1788000000', 'changeInReceivables': 'None', 'changeInInventory': '180000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5582000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5904000000', 'dividendPayoutCommonStock': '5904000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-282000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '7501000000'}, {'fiscalDateEnding': '2021-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12548000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4246000000', 'capitalExpenditures': '1548000000', 'changeInReceivables': 'None', 'changeInInventory': '-40000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5288000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5748000000', 'dividendPayoutCommonStock': '5748000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-288000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5735000000'}, {'fiscalDateEnding': '2020-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '11678000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4299000000', 'capitalExpenditures': '1524000000', 'changeInReceivables': 'None', 'changeInInventory': '-47000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-4949000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5630000000', 'dividendPayoutCommonStock': '5630000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-149000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5590000000'}, {'fiscalDateEnding': '2019-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12221000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4485000000', 'capitalExpenditures': '1781000000', 'changeInReceivables': 'None', 'changeInInventory': '-20000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-8748000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5556000000', 'dividendPayoutCommonStock': '5556000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-6792000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '9431000000'}, {'fiscalDateEnding': '2018-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '16251000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4678000000', 'capitalExpenditures': '2037000000', 'changeInReceivables': 'None', 'changeInInventory': '70000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-14380000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5496000000', 'dividendPayoutCommonStock': '5496000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-12343000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '15871000000'}]}
+stock_data = data
+previous_five_netIncome = get_previous_five_years_operating_cashflow(stock_data)
+print(previous_five_netIncome)
+
+from datetime import datetime
+
+def get_previous_five_years_operating_cashflow(stock_data):
+    """
+    Extracts the 'operatingCashflow' for the five previous fiscal years.
+
+    Args:
+        stock_data (dict): A dictionary containing stock data, with 'annualReports'
+                           being a list of dictionaries with fiscal information.
+
+    Returns:
+        dict: A dictionary where keys are fiscal ending dates and values are
+              the corresponding 'operatingCashflow' for the five previous years.
+    """
+    if not stock_data or 'annualReports' not in stock_data or not stock_data['annualReports']:
+        return {}
+
+    reports = stock_data['annualReports']
+    # Sort reports by fiscalDateEnding in descending order (most recent first)
+    reports.sort(key=lambda x: x['fiscalDateEnding'], reverse=True)
+
+    if not reports:
+        return {}
+
+    latest_date_str = reports[0]['fiscalDateEnding']
+    latest_year = datetime.strptime(latest_date_str, "%Y-%m-%d").year
+
+    previous_cashflows = {}
+    for report in reports:
+        date_str = report['fiscalDateEnding']
+        year = datetime.strptime(date_str, "%Y-%m-%d").year
+        if latest_year - 10 <= year < latest_year and 'netIncome' in report:
+            previous_cashflows[date_str] = report['netIncome']
+
+    return previous_cashflows
+
+# stock_data = {'symbol': 'IBM', 'annualReports': [{'fiscalDateEnding': '2024-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13445000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4667000000', 'capitalExpenditures': '1685000000', 'changeInReceivables': 'None', 'changeInInventory': '-166000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-7079000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6147000000', 'dividendPayoutCommonStock': '6147000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-651000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6023000000'}, {'fiscalDateEnding': '2023-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13432000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4381000000', 'capitalExpenditures': '1918000000', 'changeInReceivables': 'None', 'changeInInventory': '390000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-6016000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6016000000', 'dividendPayoutCommonStock': '6016000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-416000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6925000000'}, {'fiscalDateEnding': '2022-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12820000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4284000000', 'capitalExpenditures': '1788000000', 'changeInReceivables': 'None', 'changeInInventory': '180000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5582000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5904000000', 'dividendPayoutCommonStock': '5904000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-282000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '7501000000'}, {'fiscalDateEnding': '2021-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12548000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4246000000', 'capitalExpenditures': '1548000000', 'changeInReceivables': 'None', 'changeInInventory': '-40000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5288000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5748000000', 'dividendPayoutCommonStock': '5748000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-288000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5735000000'}, {'fiscalDateEnding': '2020-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '11678000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4299000000', 'capitalExpenditures': '1524000000', 'changeInReceivables': 'None', 'changeInInventory': '-47000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-4949000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5630000000', 'dividendPayoutCommonStock': '5630000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-149000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5590000000'}, {'fiscalDateEnding': '2019-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12221000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4485000000', 'capitalExpenditures': '1781000000', 'changeInReceivables': 'None', 'changeInInventory': '-20000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-8748000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5556000000', 'dividendPayoutCommonStock': '5556000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-6792000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '9431000000'}, {'fiscalDateEnding': '2018-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '16251000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4678000000', 'capitalExpenditures': '2037000000', 'changeInReceivables': 'None', 'changeInInventory': '70000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-14380000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5496000000', 'dividendPayoutCommonStock': '5496000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-12343000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '15871000000'}]}
+stock_data = data
+previous_five_netIncome = get_previous_five_years_operating_cashflow(stock_data)
+print(previous_five_netIncome)
+
+from datetime import datetime
+
+def get_previous_five_years_operating_cashflow(stock_data):
+    """
+    Extracts the 'operatingCashflow' for the five previous fiscal years.
+
+    Args:
+        stock_data (dict): A dictionary containing stock data, with 'annualReports'
+                           being a list of dictionaries with fiscal information.
+
+    Returns:
+        dict: A dictionary where keys are fiscal ending dates and values are
+              the corresponding 'operatingCashflow' for the five previous years.
+    """
+    if not stock_data or 'annualReports' not in stock_data or not stock_data['annualReports']:
+        return {}
+
+    reports = stock_data['annualReports']
+    # Sort reports by fiscalDateEnding in descending order (most recent first)
+    reports.sort(key=lambda x: x['fiscalDateEnding'], reverse=True)
+
+    if not reports:
+        return {}
+
+    latest_date_str = reports[0]['fiscalDateEnding']
+    latest_year = datetime.strptime(latest_date_str, "%Y-%m-%d").year
+
+    previous_cashflows = {}
+    for report in reports:
+        date_str = report['fiscalDateEnding']
+        year = datetime.strptime(date_str, "%Y-%m-%d").year
+        if latest_year - 10 <= year < latest_year and 'totalCurrentLiabilities' in report:
+            previous_cashflows[date_str] = report['totalCurrentLiabilities']
+
+    return previous_cashflows
+
+# stock_data = {'symbol': 'IBM', 'annualReports': [{'fiscalDateEnding': '2024-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13445000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4667000000', 'capitalExpenditures': '1685000000', 'changeInReceivables': 'None', 'changeInInventory': '-166000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-7079000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6147000000', 'dividendPayoutCommonStock': '6147000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-651000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6023000000'}, {'fiscalDateEnding': '2023-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13432000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4381000000', 'capitalExpenditures': '1918000000', 'changeInReceivables': 'None', 'changeInInventory': '390000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-6016000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6016000000', 'dividendPayoutCommonStock': '6016000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-416000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6925000000'}, {'fiscalDateEnding': '2022-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12820000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4284000000', 'capitalExpenditures': '1788000000', 'changeInReceivables': 'None', 'changeInInventory': '180000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5582000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5904000000', 'dividendPayoutCommonStock': '5904000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-282000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '7501000000'}, {'fiscalDateEnding': '2021-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12548000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4246000000', 'capitalExpenditures': '1548000000', 'changeInReceivables': 'None', 'changeInInventory': '-40000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5288000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5748000000', 'dividendPayoutCommonStock': '5748000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-288000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5735000000'}, {'fiscalDateEnding': '2020-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '11678000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4299000000', 'capitalExpenditures': '1524000000', 'changeInReceivables': 'None', 'changeInInventory': '-47000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-4949000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5630000000', 'dividendPayoutCommonStock': '5630000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-149000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5590000000'}, {'fiscalDateEnding': '2019-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12221000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4485000000', 'capitalExpenditures': '1781000000', 'changeInReceivables': 'None', 'changeInInventory': '-20000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-8748000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5556000000', 'dividendPayoutCommonStock': '5556000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-6792000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '9431000000'}, {'fiscalDateEnding': '2018-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '16251000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4678000000', 'capitalExpenditures': '2037000000', 'changeInReceivables': 'None', 'changeInInventory': '70000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-14380000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5496000000', 'dividendPayoutCommonStock': '5496000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-12343000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '15871000000'}]}
+stock_data = data2
+previous_five_totalCurrentLiabilities = get_previous_five_years_operating_cashflow(stock_data)
+print(previous_five_totalCurrentLiabilities)
+
+from datetime import datetime
+
+def get_previous_five_years_operating_cashflow(stock_data):
+    """
+    Extracts the 'operatingCashflow' for the five previous fiscal years.
+
+    Args:
+        stock_data (dict): A dictionary containing stock data, with 'annualReports'
+                           being a list of dictionaries with fiscal information.
+
+    Returns:
+        dict: A dictionary where keys are fiscal ending dates and values are
+              the corresponding 'operatingCashflow' for the five previous years.
+    """
+    if not stock_data or 'annualReports' not in stock_data or not stock_data['annualReports']:
+        return {}
+
+    reports = stock_data['annualReports']
+    # Sort reports by fiscalDateEnding in descending order (most recent first)
+    reports.sort(key=lambda x: x['fiscalDateEnding'], reverse=True)
+
+    if not reports:
+        return {}
+
+    latest_date_str = reports[0]['fiscalDateEnding']
+    latest_year = datetime.strptime(latest_date_str, "%Y-%m-%d").year
+
+    previous_cashflows = {}
+    for report in reports:
+        date_str = report['fiscalDateEnding']
+        year = datetime.strptime(date_str, "%Y-%m-%d").year
+        if latest_year - 10 <= year < latest_year and 'totalAssets' in report:
+            previous_cashflows[date_str] = report['totalAssets']
+
+    return previous_cashflows
+
+# stock_data = {'symbol': 'IBM', 'annualReports': [{'fiscalDateEnding': '2024-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13445000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4667000000', 'capitalExpenditures': '1685000000', 'changeInReceivables': 'None', 'changeInInventory': '-166000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-7079000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6147000000', 'dividendPayoutCommonStock': '6147000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-651000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6023000000'}, {'fiscalDateEnding': '2023-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13432000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4381000000', 'capitalExpenditures': '1918000000', 'changeInReceivables': 'None', 'changeInInventory': '390000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-6016000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6016000000', 'dividendPayoutCommonStock': '6016000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-416000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6925000000'}, {'fiscalDateEnding': '2022-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12820000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4284000000', 'capitalExpenditures': '1788000000', 'changeInReceivables': 'None', 'changeInInventory': '180000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5582000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5904000000', 'dividendPayoutCommonStock': '5904000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-282000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '7501000000'}, {'fiscalDateEnding': '2021-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12548000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4246000000', 'capitalExpenditures': '1548000000', 'changeInReceivables': 'None', 'changeInInventory': '-40000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5288000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5748000000', 'dividendPayoutCommonStock': '5748000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-288000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5735000000'}, {'fiscalDateEnding': '2020-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '11678000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4299000000', 'capitalExpenditures': '1524000000', 'changeInReceivables': 'None', 'changeInInventory': '-47000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-4949000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5630000000', 'dividendPayoutCommonStock': '5630000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-149000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5590000000'}, {'fiscalDateEnding': '2019-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12221000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4485000000', 'capitalExpenditures': '1781000000', 'changeInReceivables': 'None', 'changeInInventory': '-20000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-8748000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5556000000', 'dividendPayoutCommonStock': '5556000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-6792000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '9431000000'}, {'fiscalDateEnding': '2018-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '16251000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4678000000', 'capitalExpenditures': '2037000000', 'changeInReceivables': 'None', 'changeInInventory': '70000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-14380000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5496000000', 'dividendPayoutCommonStock': '5496000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-12343000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '15871000000'}]}
+stock_data = data2
+previous_five_totalassets = get_previous_five_years_operating_cashflow(stock_data)
+print(previous_five_totalassets)
+
+from datetime import datetime
+
+def get_previous_five_years_operating_cashflow(stock_data):
+    """
+    Extracts the 'operatingCashflow' for the five previous fiscal years.
+
+    Args:
+        stock_data (dict): A dictionary containing stock data, with 'annualReports'
+                           being a list of dictionaries with fiscal information.
+
+    Returns:
+        dict: A dictionary where keys are fiscal ending dates and values are
+              the corresponding 'operatingCashflow' for the five previous years.
+    """
+    if not stock_data or 'annualReports' not in stock_data or not stock_data['annualReports']:
+        return {}
+
+    reports = stock_data['annualReports']
+    # Sort reports by fiscalDateEnding in descending order (most recent first)
+    reports.sort(key=lambda x: x['fiscalDateEnding'], reverse=True)
+
+    if not reports:
+        return {}
+
+    latest_date_str = reports[0]['fiscalDateEnding']
+    latest_year = datetime.strptime(latest_date_str, "%Y-%m-%d").year
+
+    previous_cashflows = {}
+    for report in reports:
+        date_str = report['fiscalDateEnding']
+        year = datetime.strptime(date_str, "%Y-%m-%d").year
+        if latest_year - 10 <= year < latest_year and 'operatingCashflow' in report:
+            previous_cashflows[date_str] = report['operatingCashflow']
+
+    return previous_cashflows
+
+# stock_data = {'symbol': 'IBM', 'annualReports': [{'fiscalDateEnding': '2024-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13445000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4667000000', 'capitalExpenditures': '1685000000', 'changeInReceivables': 'None', 'changeInInventory': '-166000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-7079000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6147000000', 'dividendPayoutCommonStock': '6147000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-651000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6023000000'}, {'fiscalDateEnding': '2023-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13432000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4381000000', 'capitalExpenditures': '1918000000', 'changeInReceivables': 'None', 'changeInInventory': '390000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-6016000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6016000000', 'dividendPayoutCommonStock': '6016000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-416000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6925000000'}, {'fiscalDateEnding': '2022-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12820000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4284000000', 'capitalExpenditures': '1788000000', 'changeInReceivables': 'None', 'changeInInventory': '180000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5582000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5904000000', 'dividendPayoutCommonStock': '5904000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-282000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '7501000000'}, {'fiscalDateEnding': '2021-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12548000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4246000000', 'capitalExpenditures': '1548000000', 'changeInReceivables': 'None', 'changeInInventory': '-40000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5288000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5748000000', 'dividendPayoutCommonStock': '5748000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-288000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5735000000'}, {'fiscalDateEnding': '2020-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '11678000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4299000000', 'capitalExpenditures': '1524000000', 'changeInReceivables': 'None', 'changeInInventory': '-47000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-4949000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5630000000', 'dividendPayoutCommonStock': '5630000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-149000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5590000000'}, {'fiscalDateEnding': '2019-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12221000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4485000000', 'capitalExpenditures': '1781000000', 'changeInReceivables': 'None', 'changeInInventory': '-20000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-8748000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5556000000', 'dividendPayoutCommonStock': '5556000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-6792000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '9431000000'}, {'fiscalDateEnding': '2018-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '16251000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4678000000', 'capitalExpenditures': '2037000000', 'changeInReceivables': 'None', 'changeInInventory': '70000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-14380000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5496000000', 'dividendPayoutCommonStock': '5496000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-12343000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '15871000000'}]}
+stock_data = data
+previous_five_operatingCashflow = get_previous_five_years_operating_cashflow(stock_data)
+print(previous_five_operatingCashflow)
+
+from datetime import datetime
+
+def get_previous_five_years_operating_cashflow(stock_data):
+    """
+    Extracts the 'operatingCashflow' for the five previous fiscal years.
+
+    Args:
+        stock_data (dict): A dictionary containing stock data, with 'annualReports'
+                           being a list of dictionaries with fiscal information.
+
+    Returns:
+        dict: A dictionary where keys are fiscal ending dates and values are
+              the corresponding 'operatingCashflow' for the five previous years.
+    """
+    if not stock_data or 'annualReports' not in stock_data or not stock_data['annualReports']:
+        return {}
+
+    reports = stock_data['annualReports']
+    # Sort reports by fiscalDateEnding in descending order (most recent first)
+    reports.sort(key=lambda x: x['fiscalDateEnding'], reverse=True)
+
+    if not reports:
+        return {}
+
+    latest_date_str = reports[0]['fiscalDateEnding']
+    latest_year = datetime.strptime(latest_date_str, "%Y-%m-%d").year
+
+    previous_cashflows = {}
+    for report in reports:
+        date_str = report['fiscalDateEnding']
+        year = datetime.strptime(date_str, "%Y-%m-%d").year
+        if latest_year - 10 <= year < latest_year and 'capitalExpenditures' in report:
+            previous_cashflows[date_str] = report['capitalExpenditures']
+
+    return previous_cashflows
+
+# stock_data = {'symbol': 'IBM', 'annualReports': [{'fiscalDateEnding': '2024-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13445000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4667000000', 'capitalExpenditures': '1685000000', 'changeInReceivables': 'None', 'changeInInventory': '-166000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-7079000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6147000000', 'dividendPayoutCommonStock': '6147000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-651000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6023000000'}, {'fiscalDateEnding': '2023-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '13432000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4381000000', 'capitalExpenditures': '1918000000', 'changeInReceivables': 'None', 'changeInInventory': '390000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-6016000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '6016000000', 'dividendPayoutCommonStock': '6016000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-416000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '6925000000'}, {'fiscalDateEnding': '2022-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12820000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4284000000', 'capitalExpenditures': '1788000000', 'changeInReceivables': 'None', 'changeInInventory': '180000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5582000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5904000000', 'dividendPayoutCommonStock': '5904000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-282000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '7501000000'}, {'fiscalDateEnding': '2021-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12548000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4246000000', 'capitalExpenditures': '1548000000', 'changeInReceivables': 'None', 'changeInInventory': '-40000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-5288000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5748000000', 'dividendPayoutCommonStock': '5748000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-288000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5735000000'}, {'fiscalDateEnding': '2020-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '11678000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4299000000', 'capitalExpenditures': '1524000000', 'changeInReceivables': 'None', 'changeInInventory': '-47000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-4949000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5630000000', 'dividendPayoutCommonStock': '5630000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-149000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '5590000000'}, {'fiscalDateEnding': '2019-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '12221000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4485000000', 'capitalExpenditures': '1781000000', 'changeInReceivables': 'None', 'changeInInventory': '-20000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-8748000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5556000000', 'dividendPayoutCommonStock': '5556000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-6792000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '9431000000'}, {'fiscalDateEnding': '2018-12-31', 'reportedCurrency': 'USD', 'operatingCashflow': '16251000000', 'paymentsForOperatingActivities': 'None', 'proceedsFromOperatingActivities': 'None', 'changeInOperatingLiabilities': 'None', 'changeInOperatingAssets': 'None', 'depreciationDepletionAndAmortization': '4678000000', 'capitalExpenditures': '2037000000', 'changeInReceivables': 'None', 'changeInInventory': '70000000', 'profitLoss': 'None', 'cashflowFromInvestment': 'None', 'cashflowFromFinancing': '-14380000000', 'proceedsFromRepaymentsOfShortTermDebt': 'None', 'paymentsForRepurchaseOfCommonStock': 'None', 'paymentsForRepurchaseOfEquity': 'None', 'paymentsForRepurchaseOfPreferredStock': 'None', 'dividendPayout': '5496000000', 'dividendPayoutCommonStock': '5496000000', 'dividendPayoutPreferredStock': 'None', 'proceedsFromIssuanceOfCommonStock': 'None', 'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet': 'None', 'proceedsFromIssuanceOfPreferredStock': 'None', 'proceedsFromRepurchaseOfEquity': '-12343000000', 'proceedsFromSaleOfTreasuryStock': 'None', 'changeInCashAndCashEquivalents': 'None', 'changeInExchangeRate': 'None', 'netIncome': '15871000000'}]}
+stock_data = data
+previous_five_capitalExpenditures = get_previous_five_years_operating_cashflow(stock_data)
+print(previous_five_capitalExpenditures)
+
+import pandas as pd
+df_cl = pd.DataFrame(list(previous_five_totalCurrentLiabilities.items()), columns=['Year', 'Current Liabilities'])
+print(df_cl)
+
+df_ca = pd.DataFrame(list(previous_five_currentAssets.items()), columns=['Year', 'Current Assets'])
+print(df_ca)
+
+df_ni = pd.DataFrame(list(previous_five_netIncome.items()), columns=['Year', 'Net Income'])
+print(df_ni)
+
+df_ta = pd.DataFrame(list(previous_five_totalassets.items()), columns=['Year', 'Total Assets'])
+print(df_ta)
+
+df_cf = pd.DataFrame(list(previous_five_operatingCashflow.items()), columns=['Year', 'Operating Cash Flow'])
+print(df_cf)
+
+df_ce = pd.DataFrame(list(previous_five_capitalExpenditures.items()), columns=['Year', 'CapEx'])
+print(df_ce)
+
+merged_df = pd.merge(df_cl, df_ca, on='Year', how='outer')
+merged_df = pd.merge(merged_df, df_ni, on='Year', how='outer')
+merged_df = pd.merge(merged_df, df_ta, on='Year', how='outer')
+merged_df = pd.merge(merged_df, df_cf, on='Year', how='outer')
+merged_df = pd.merge(merged_df, df_ce, on='Year', how='outer')
+print(merged_df)
+
+merged_df.dtypes
+
+merged_df['Current Liabilities']=pd.to_numeric(merged_df['Current Liabilities'],errors= 'coerce')
+merged_df['Current Assets']=pd.to_numeric(merged_df['Current Assets'],errors= 'coerce')
+merged_df['Net Income']=pd.to_numeric(merged_df['Net Income'],errors= 'coerce')
+merged_df['Total Assets']=pd.to_numeric(merged_df['Total Assets'],errors= 'coerce')
+merged_df['Operating Cash Flow']=pd.to_numeric(merged_df['Operating Cash Flow'],errors= 'coerce')
+merged_df['CapEx']=pd.to_numeric(merged_df['CapEx'],errors= 'coerce')
+
+merged_df['Current Ratio'] = merged_df['Current Assets'] / merged_df['Current Liabilities']
+merged_df['Return on Assets'] = (merged_df['Net Income'] / merged_df['Total Assets']) * 100
+print(merged_df)
+
+merged_df['FCF'] = merged_df['Operating Cash Flow'] - merged_df['CapEx']
+print(merged_df)
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))  # Adjust figure size as needed
+plt.bar(merged_df['Year'], merged_df['FCF'], color = 'Red')
+plt.xlabel('Year')
+plt.ylabel('FCF')
+plt.title('FCF for Dell')
+plt.show()
+
+  
+plt.figure(figsize=(10, 6))  # Adjust figure size as needed
+plt.plot(merged_df['Year'], merged_df['FCF'], color = 'Red')
+plt.xlabel('Year')
+plt.ylabel('FCF')
+plt.title('FCF for Dell')
+plt.show()
+
+  
+plt.figure(figsize=(10, 6))  # Adjust figure size as needed
+plt.plot(merged_df['Year'], merged_df['Current Ratio'], color = 'Red')
+plt.xlabel('Year')
+plt.ylabel('Current Ratio')
+plt.title('Current Ratio for Dell')
+plt.show()
+
+  
+plt.figure(figsize=(10, 6))  # Adjust figure size as needed
+plt.plot(merged_df['Year'], merged_df['Return on Assets'], color = 'Red')
+plt.xlabel('Year')
+plt.ylabel('ROA')
+plt.title('Return on Assets for Dell')
+plt.show()
